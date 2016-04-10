@@ -1,0 +1,17 @@
+<h1>Vulns </h1>
+
+<div>huuh</div>
+<ul>
+	{{ range $key, $value := . }}
+	   <li class="vuln" id="{{$key}}"><a href="{{ $value.url }}" target="_blank">{{ $value.url }}</a>
+			 <br />{{ $value.desc }}
+		 </li>
+		 <!--
+		 {{ range $k, $v := $value }}
+		 <li><strong>{{ $k }}</strong>: {{ $v }}</li>
+		 {{end}}
+	 -->
+	{{ end }}
+</ul>
+
+<h2>end</h2>
