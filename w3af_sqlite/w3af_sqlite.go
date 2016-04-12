@@ -145,98 +145,32 @@ func VulnerabilityInsert(url, desc, sev, plugin, cat string, project, scan int64
 // GetVulnerabilities returns all vulnerabilities
 func GetVulnerabilities() map[string]map[string]string {
 	rows, err := db.Query("select vuln_id,vuln_url,vuln_description,vuln_scan,vuln_severity,vuln_plugin,vuln_project,vuln_categorie,vuln_state from vulns")
-	//rows, err := db.Query("SELECT * FROM vulns")
 	checkErr(err)
-	r := make(map[string]map[string]string)
+	m := make(map[string]map[string]string)
 	defer rows.Close()
-
 	var (
-		//id,cat,sev,project,state,plugin int64
-		id, request, cat, sev, project, state, plugin, url, desc, comment string
+		id, url, desc, scan, sev, plugin, project, cat, state string
 	)
 
 	for rows.Next() {
-
-		rows.Scan(&id, &request, &cat, &sev, &project, &state, &plugin, &url, &desc, &comment)
-		fmt.Println("das sind doch viele?", id, request, cat, sev, project, state, plugin, url, desc, comment)
-
-		_, ok := r[id]
+		rows.Scan(&id, &url, &desc, &scan, &sev, &plugin, &project, &cat, &state)
+		// create a map of each Vulnerability
+		_, ok := m[id]
 		if !ok {
 			mm := make(map[string]string)
-			r[id] = mm
+			m[id] = mm
 		}
 
-		r[id]["cat"] = cat
-		r[id]["request"] = request
-		r[id]["sev"] = sev
-		r[id]["project"] = project
-		r[id]["state"] = state
-		r[id]["plugin"] = plugin
-		r[id]["url"] = url
-		r[id]["desc"] = desc
-		r[id]["comment"] = comment
-		fmt.Println(r)
-		fmt.Println("\n ")
+		m[id]["url"] = url
+		m[id]["desc"] = desc
+		m[id]["sev"] = sev
+		m[id]["plugin"] = plugin
+		m[id]["project"] = project
+		m[id]["cat"] = cat
+		m[id]["state"] = state
 	}
-	return r
-}
 
-// GetTest dsds
-func GetTest() bool {
-
-	rows, err := db.Query("SELECT vuln_id, vuln_url FROM vulns")
-	checkErr(err)
-	m := make(map[string]string)
-	defer rows.Close()
-	var (
-		id, name string
-	)
-	for rows.Next() {
-
-		rows.Scan(&id, &name)
-		//fmt.Println(id, name)
-		m[id] = name
-	}
-	fmt.Println(m)
-
-	/*
-		rows,err := db.Query("select vuln_url,vuln_description,vuln_scan,vuln_severity,vuln_plugin,vuln_project,vuln_categorie,vuln_state from vulns")
-		//rows, err := db.Query("SELECT * FROM vulns")
-		checkErr(err)
-		r := make(map[string]map[string]string)
-		defer rows.Close()
-
-		var (
-			//id,cat,sev,project,state,plugin int64
-			id,request,cat,sev,project,state,plugin,url,desc,comment string
-		)
-
-		for rows.Next() {
-
-
-			rows.Scan(&id, &request, &cat, &sev, &project, &state, &plugin, &url, &desc, &comment)
-			fmt.Println("das sind doch viele?",id,request,cat, sev,project, state, plugin, url, desc, comment)
-
-			_, ok := r[id]
-			if !ok {
-				mm := make(map[string]string)
-				r[id] = mm
-			}
-
-			r[id]["cat"] = cat
-			r[id]["request"] = request
-			r[id]["sev"] = sev
-			r[id]["project"] = project
-			r[id]["state"] = state
-			r[id]["plugin"] = plugin
-			r[id]["url"] = url
-			r[id]["desc"] = desc
-			r[id]["comment"] = comment
-			fmt.Println(r)
-			fmt.Println("\n ")
-		}
-	*/
-	return true
+	return m
 }
 
 func checkErr(err error) {
@@ -245,57 +179,3 @@ func checkErr(err error) {
 		panic(err)
 	}
 }
-
-/*/ Dbmanager connect and read / write to the sqlite db
-func Dbmanager() {
-
-	stmt, err := db.Prepare("SELECT name FROM sqlite_master WHERE type = 'table'")
-
-	res, err := stmt.Exec()
-
-	// insert
-	stmt, err = db.Prepare("INSERT INTO userinfo(username, departname, created) values(?,?,?)")
-
-	res, err = stmt.Exec("astaxie", "研发部门", "2012-12-09")
-
-	id, err := res.LastInsertId()
-
-	fmt.Println(id)
-	// update
-	stmt, err = db.Prepare("update userinfo set username=? where uid=?")
-
-	res, err = stmt.Exec("astaxieupdate", id)
-
-	affect, err := res.RowsAffected()
-
-	fmt.Println(affect)
-
-	// query
-	rows, err := db.Query("SELECT * FROM userinfo")
-
-	for rows.Next() {
-		var uid int
-		var username string
-		var department string
-		var created string
-		err = rows.Scan(&uid, &username, &department, &created)
-
-		fmt.Println(uid)
-		fmt.Println(username)
-		fmt.Println(department)
-		fmt.Println(created)
-	}
-
-	// delete
-	stmt, err = db.Prepare("delete from userinfo where uid=?")
-
-	res, err = stmt.Exec(id)
-
-	affect, err = res.RowsAffected()
-
-	fmt.Println(affect)
-
-	db.Close()
-
-}
-*/

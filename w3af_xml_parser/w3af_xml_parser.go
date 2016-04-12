@@ -8,10 +8,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	db "w3af_results_organizer/w3af_sqlite"
 
-	// path where you clone the git package to // git clone https://github.com/mattn/go-sqlite3.git
-	_ "github.com/mattn/go-sqlite3"
+	db "github.com/lalelunet/w3af_results_organizer/w3af_sqlite"
 )
 
 // define the xml struct informations from the vulnerabilities
