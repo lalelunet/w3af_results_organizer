@@ -1,9 +1,27 @@
-<h1>Vulns </h1>
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="/js/jquery-2.2.3.min.js"></script>
+	</head>
+	<body>
+		<h1>Vulns </h1>
+		<ul>
+			{{ range $key, $value := . }}
+			   <li class="vuln" id="vuln-{{$key}}" style="list-style-type: none; padding: 10px; border-bottom: 1px solid brown;">
+					 <div align="right">project: {{ $value.project }} scan nr.: {{ $value.scan }} <a class="fp" value="1" key="{{$key}}" href="javascript:void(0)">false - positiv</a> | <a class="fp" value="2" key="{{$key}}" href="javascript:void(0)">resolved</a></div>
+					 <br /><a href="{{ $value.url }}" target="_blank">{{ $value.url }}</a>
+					 <br />{{ $value.desc }}<br /><br />
+				 </li>
+			{{ end }}
+		</ul>
+		<script>
+			$('.fp').click(function(){
+				$.get('/vuln/status/', { 'vuln' : $(this).attr('key'), 'value' : $(this).attr('value') }, function(data){
+					$('#vuln-'+$(this).attr('key')).fadeOut();
+					console.log(data);
+				});
+			});
+		</script>
 
-<ul>
-	{{ range $key, $value := . }}
-	   <li class="vuln" id="{{$key}}"><a href="{{ $value.url }}" target="_blank">{{ $value.url }}</a>
-			 <br />{{ $value.desc }}<br /><br />
-		 </li>
-	{{ end }}
-</ul>
+	</body>
+</html>

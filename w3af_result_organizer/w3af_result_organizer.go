@@ -13,7 +13,10 @@ import (
 
 func main() {
 	mux := http.NewServeMux()
+	fs := http.FileServer(http.Dir("templates/js"))
+	mux.Handle("/js/", http.StripPrefix("/js/", fs))
 	mux.HandleFunc("/", index)
+	mux.HandleFunc("/vuln/status/", vulnchange)
 	http.ListenAndServe(":8000", mux)
 }
 
@@ -22,6 +25,10 @@ func index(w http.ResponseWriter, r *http.Request) {
 	tpl := template.Must(template.ParseFiles("templates/vuln.html"))
 	err := tpl.ExecuteTemplate(w, "vuln.html", vulns)
 	checkErr(err)
+}
+
+func vulnchange(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("fff%s", r.RequestURI)
 }
 
 func checkErr(err error) {
