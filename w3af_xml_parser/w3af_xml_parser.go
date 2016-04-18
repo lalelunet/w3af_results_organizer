@@ -112,9 +112,11 @@ func parseXML(path string) bool {
 // If the requeseted project does not exist it will be created.
 func getProject(arg string) (id int64) {
 	projects := db.GetProjects()
-	// parse file name to define the scan project
+	// parse file path to define the scan project
+	dirs := strings.Split(arg, "/")
+	file := dirs[len(dirs)-1]
 	var pr string
-	prn := strings.Split(arg, ".")
+	prn := strings.Split(file, ".")
 	if len(prn) >= 2 {
 		pr = prn[0]
 		fmt.Printf("Project name found. Using: %s \n ", pr)
