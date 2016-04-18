@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"strings"
 
+	dbg "github.com/davecgh/go-spew/spew"
 	db "github.com/lalelunet/w3af_results_organizer/w3af_sqlite"
 )
 
@@ -28,7 +30,24 @@ func index(w http.ResponseWriter, r *http.Request) {
 }
 
 func vulnchange(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("fff%s", r.RequestURI)
+	m := parseQueryString(r.RequestURI)
+
+	dbg.Dump(m)
+}
+
+// parseQueryString takes query string from a url and returns the key values as a map[string]string
+func parseQueryString(s string) map[string]string {
+	sp := strings.Split(s, "?")
+	m := make(map[string]string)
+	//there are get parameters at the url
+	if len(sp) == 2 {
+		params := strings.Split(sp[1], "&")
+		for _, v := range params {
+			pair := strings.Split(v, "=")
+			m[pair[0]] = pair[1]
+		}
+	}
+	return m
 }
 
 func checkErr(err error) {
