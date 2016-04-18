@@ -31,8 +31,9 @@ func index(w http.ResponseWriter, r *http.Request) {
 
 func vulnchange(w http.ResponseWriter, r *http.Request) {
 	m := parseQueryString(r.RequestURI)
-
 	dbg.Dump(m)
+	num := db.VulnerabilityUpdate(m["vuln"], m["state"], m["comment"])
+	dbg.Dump(num)
 }
 
 // parseQueryString takes query string from a url and returns the key values as a map[string]string

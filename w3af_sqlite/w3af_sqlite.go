@@ -19,10 +19,10 @@ func GetPlugins() map[string]map[string]string {
 	checkErr(err)
 	m := make(map[string]map[string]string)
 	defer rows.Close()
-	var (
-		id, cat, name, desc string
-	)
 	for rows.Next() {
+		var (
+			id, cat, name, desc string
+		)
 		rows.Scan(&id, &cat, &name, &desc)
 		_, ok := m[name]
 		if !ok {
@@ -44,10 +44,10 @@ func GetCategories() map[string]map[string]string {
 	checkErr(err)
 	m := make(map[string]map[string]string)
 	defer rows.Close()
-	var (
-		id, name, desc string
-	)
 	for rows.Next() {
+		var (
+			id, name, desc string
+		)
 		rows.Scan(&id, &name, &desc)
 		_, ok := m[name]
 		if !ok {
@@ -68,10 +68,10 @@ func GetSeverities() map[string]string {
 	checkErr(err)
 	m := make(map[string]string)
 	defer rows.Close()
-	var (
-		id, name string
-	)
 	for rows.Next() {
+		var (
+			id, name string
+		)
 		rows.Scan(&id, &name)
 		m[name] = id
 	}
@@ -96,11 +96,11 @@ func GetProjects() map[string]int64 {
 	checkErr(err)
 	m := make(map[string]int64)
 	defer rows.Close()
-	var (
-		id   int64
-		name string
-	)
 	for rows.Next() {
+		var (
+			id   int64
+			name string
+		)
 		rows.Scan(&id, &name)
 		m[name] = id
 	}
@@ -144,16 +144,16 @@ func VulnerabilityInsert(url, desc, sev, plugin, cat string, project, scan int64
 
 // GetVulnerabilities returns all vulnerabilities
 func GetVulnerabilities() map[string]map[string]string {
-	rows, err := db.Query("select vuln_id,vuln_url,vuln_description,vuln_scan,vuln_severity,vuln_plugin,vuln_project,vuln_categorie,vuln_state from vulns")
+	rows, err := db.Query("select vuln_id,vuln_url,vuln_description,vuln_scan,vuln_severity,vuln_plugin,vuln_project,vuln_categorie,vuln_state,vuln_comment from vulns")
 	checkErr(err)
 	m := make(map[string]map[string]string)
 	defer rows.Close()
-	var (
-		id, url, desc, scan, sev, plugin, project, cat, state string
-	)
 
 	for rows.Next() {
-		rows.Scan(&id, &url, &desc, &scan, &sev, &plugin, &project, &cat, &state)
+		var (
+			id, url, desc, scan, sev, plugin, project, cat, state, comment string
+		)
+		rows.Scan(&id, &url, &desc, &scan, &sev, &plugin, &project, &cat, &state, &comment)
 		// create a map of each Vulnerability
 		_, ok := m[id]
 		if !ok {
@@ -168,9 +168,23 @@ func GetVulnerabilities() map[string]map[string]string {
 		m[id]["project"] = project
 		m[id]["cat"] = cat
 		m[id]["state"] = state
+		m[id]["comment"] = comment
 	}
 
 	return m
+}
+
+// VulnerabilityUpdate update a vulnerability. (vuln, state, desc string) int64
+func VulnerabilityUpdate(vuln, state, comment string) int64 {
+	fmt.Println("rrr", vuln, state, comment, "ttt")
+	stmt, err := db.Prepare("UPDATE vulns set vuln_comment=?, vuln_state=? where vuln_id=?")
+	checkErr(err)
+	ret, err := stmt.Exec(comment, state, vuln)
+	checkErr(err)
+	num, err := ret.RowsAffected()
+	checkErr(err)
+
+	return num
 }
 
 func checkErr(err error) {
