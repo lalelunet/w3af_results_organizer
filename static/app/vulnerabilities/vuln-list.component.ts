@@ -7,19 +7,28 @@ import { VulnerabilityService } from './vulnerability.service';
   template:
   `
     <ul>
-      <li *ngFor="let vuln of vulns">
+      <li *ngFor="let vuln of vulns" (click)="selectVulnerability(vuln)">
         {{vuln.name}}
       </li>
     </ul>
+
+    <section *ngIf="selectedVulnerability">
+      {{selectedVulnerability.url}}
+    </section>
   `
 })
 
 export class VulnListComponent{
   vulns: Vulnerability[] = [];
+  selectedVulnerability: Vulnerability;
 
   constructor(private _vulnService: VulnerabilityService){}
 
   ngOnInit(){
     this.vulns = this._vulnService.getAll();
+  }
+
+  selectVulnerability(vuln: Vulnerability){
+    this.selectedVulnerability = vuln;
   }
 }
