@@ -7,7 +7,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/mattn/go-sqlite3" // path where you clone the git package to // git clone https://github.com/mattn/go-sqlite3.git
+	_ "github.com/mattn/go-sqlite3" //
 )
 
 var db, err = sql.Open("sqlite3", "w3af_results_organizer.db")

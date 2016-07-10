@@ -19,13 +19,15 @@ func main() {
 	mux.Handle("/js/", http.StripPrefix("/js/", fs))
 	mux.HandleFunc("/", index)
 	mux.HandleFunc("/vuln/status/", vulnchange)
+	mux.HandleFunc("/scan/result/", vulnchange)
 	http.ListenAndServe(":8000", mux)
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
 	vulns := db.GetVulnerabilities()
-	tpl := template.Must(template.ParseFiles("templates/vuln.html"))
-	err := tpl.ExecuteTemplate(w, "vuln.html", vulns)
+	tpl := template.Must(template.ParseFiles("templates/index.html"))
+	err := tpl.ExecuteTemplate(w, "index.html", vulns)
+	//err := tpl.ExecuteTemplate(w, "vuln.html", vulns)
 	checkErr(err)
 }
 
