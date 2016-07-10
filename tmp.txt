@@ -1,0 +1,4 @@
+
+// install dependencies
+cd Documents/workspace/src/github.com/lalelunet/w3af_results_organizer/w3af_result_organizer/w3af_result_organizer.go
+go run ./
