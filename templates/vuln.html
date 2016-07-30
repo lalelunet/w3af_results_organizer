@@ -7,11 +7,11 @@
 		<h1>Vulns </h1>
 		<ul>
 			{{ range $key, $value := . }}
-			   <li class="vuln" id="vuln-{{$key}}" style="list-style-type: none; padding: 10px; border-bottom: 1px solid brown; line-height: 30px;">
+			   <li class="vuln" id="vuln-{{$value.id}}" style="list-style-type: none; padding: 10px; border-bottom: 1px solid brown; line-height: 30px;">
 					 <div align="right">
-						 id: {{ $key }} project: {{ $value.project }} scan nr.: {{ $value.scan }} <a class="fp" state="1" key="{{$key}}" href="javascript:void(0)">false - positiv</a> | <a class="fp" state="2" key="{{$key}}" href="javascript:void(0)">resolved</a> | <a class="fp" state="3" key="{{$key}}" href="javascript:void(0)">confirm and ignore</a></div>
+						 id: {{ $value.id }} project: {{ $value.project }} scan nr.: {{ $value.scan }} <a class="fp" state="1" key="{{$value.id}}" href="javascript:void(0)">false - positiv</a> | <a class="fp" state="2" key="{{$value.id}}" href="javascript:void(0)">resolved</a> | <a class="fp" state="3" key="{{$value.id}}" href="javascript:void(0)">confirm and ignore</a></div>
 					 <br /><a href="{{ $value.url }}" target="_blank">{{ $value.url }}</a>
-					 <br /><input type="text" id="vuln_comment-{{$key}}" placeholder="comment" style="width: 90%; padding: 20; " value="{{ $value.comment }}"></input>
+					 <br /><input type="text" id="vuln_comment-{{$value.id}}" placeholder="comment" style="width: 90%; padding: 20; " value="{{ $value.comment }}"></input>
 					 <br />{{ $value.desc }}<br /><br />
 				 </li>
 			{{ end }}

@@ -1,21 +1,13 @@
 import { Component } from '@angular/core';
+import { ROUTER_DIRECTIVES } from '@angular/router';
 import { Vulnerability } from './vulnerability';
 import { VulnerabilityService } from './vulnerability.service';
+import { VulnDetailsComponent } from './vuln-details.component';
 
 @Component({
   selector: 'vulnerability-list',
-  template:
-  `
-    <ul>
-      <li *ngFor="let vuln of vulns" (click)="selectVulnerability(vuln)">
-        {{vuln.name}}
-      </li>
-    </ul>
-
-    <section *ngIf="selectedVulnerability">
-      {{selectedVulnerability.url}}
-    </section>
-  `
+  directives: [VulnDetailsComponent],
+  templateUrl: 'app/templates/vuln-list.component.html'
 })
 
 export class VulnListComponent{

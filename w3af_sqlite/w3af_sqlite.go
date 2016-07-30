@@ -142,6 +142,52 @@ func VulnerabilityInsert(url, desc, sev, plugin, cat string, project, scan int64
 	return id
 }
 
+// GetVulnerabilities returns vulnerabilities
+func GetVulnerabilities(scan, project string) map[int]map[string]string {
+	stmt, err := db.Prepare("SELECT vuln_id,vuln_url,vuln_description,vuln_scan,vuln_severity,vuln_plugin,vuln_project,vuln_categorie,vuln_state,vuln_comment from vulns where vuln_state = ?")
+	parameter := "0"
+	checkErr(err)
+	switch {
+	case scan != "0":
+		stmt, err = db.Prepare("SELECT vuln_id,vuln_url,vuln_description,vuln_scan,vuln_severity,vuln_plugin,vuln_project,vuln_categorie,vuln_state,vuln_comment from vulns where vuln_scan = ?")
+		parameter = scan
+	case project != "0":
+		stmt, err = db.Prepare("SELECT vuln_id,vuln_url,vuln_description,vuln_scan,vuln_severity,vuln_plugin,vuln_project,vuln_categorie,vuln_state,vuln_comment from vulns where vuln_project = ?")
+		parameter = project
+	}
+	cnt := 0
+	m := make(map[int]map[string]string)
+
+	rows, err := stmt.Query(parameter)
+	checkErr(err)
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			id, url, desc, scan, sev, plugin, project, cat, state, comment string
+		)
+		rows.Scan(&id, &url, &desc, &scan, &sev, &plugin, &project, &cat, &state, &comment)
+
+		// create a map of each Vulnerability
+		mm := make(map[string]string)
+		cnt++
+		m[cnt] = mm
+		m[cnt]["id"] = id
+		m[cnt]["url"] = url
+		m[cnt]["desc"] = desc
+		m[cnt]["sev"] = sev
+		m[cnt]["plugin"] = plugin
+		m[cnt]["project"] = project
+		m[cnt]["cat"] = cat
+		m[cnt]["state"] = state
+		m[cnt]["comment"] = comment
+	}
+
+	return m
+}
+
+/*
+
 // GetVulnerabilities returns all vulnerabilities
 func GetVulnerabilities() map[string]map[string]string {
 	rows, err := db.Query("select vuln_id,vuln_url,vuln_description,vuln_scan,vuln_severity,vuln_plugin,vuln_project,vuln_categorie,vuln_state,vuln_comment from vulns")
@@ -174,9 +220,26 @@ func GetVulnerabilities() map[string]map[string]string {
 	return m
 }
 
+
+*/
+
+// GetScanData returns project and details from the scan
+func GetScanData(scan string) map[string]string {
+	var (
+		date, name string
+	)
+
+	err := db.QueryRow("select scan_date, project_name from scans sc inner join projects pr on sc.scan_project =  pr.project_id where scan_id = ?", scan).Scan(&date, &name)
+	checkErr(err)
+	m := make(map[string]string)
+	m["date"] = date
+	m["name"] = name
+
+	return m
+}
+
 // VulnerabilityUpdate update a vulnerability. (vuln, state, desc string) int64
 func VulnerabilityUpdate(vuln, state, comment string) int64 {
-	fmt.Println("rrr", vuln, state, comment, "ttt")
 	stmt, err := db.Prepare("UPDATE vulns set vuln_comment=?, vuln_state=? where vuln_id=?")
 	checkErr(err)
 	ret, err := stmt.Exec(comment, state, vuln)
@@ -189,7 +252,11 @@ func VulnerabilityUpdate(vuln, state, comment string) int64 {
 
 func checkErr(err error) {
 	if err != nil {
-		fmt.Printf("Error: %v", err)
-		panic(err)
+		// empty rows in queries should not panic
+		if err != sql.ErrNoRows {
+			fmt.Printf("Error: %v", err)
+			panic(err)
+		}
+
 	}
 }
