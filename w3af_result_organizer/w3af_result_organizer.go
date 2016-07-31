@@ -55,32 +55,79 @@ func vulnChange(w http.ResponseWriter, r *http.Request) {
 
 func exportScanResult(w http.ResponseWriter, r *http.Request) {
 	m := parseQueryString(r.RequestURI)
-	dbg.Dump(m)
 	_, ok := m["scan"]
 	if !ok {
 		return
 	}
-	vulns := db.GetVulnerabilities(m["scan"], "0")
 
 	// create a new buffer
 	b := &bytes.Buffer{}
 	wr := csv.NewWriter(b)
 
+	scan := db.GetScanData(m["scan"])
+
 	// insert some format stuff to make the cvs looking better
-	wr.Write([]string{" ", " ", " ", " ", " "})
+	wr.Write([]string{" "})
+	wr.Write([]string{" ", "Project:", scan["name"], "Scan:", scan["date"]})
+	wr.Write([]string{" "})
 
-	for _, row := range vulns {
-		//dat = []string{row["plugin"], row["state"], row["url"]}
-		fmt.Println(row["url"])
+	vulns := db.GetVulnerabilities(m["scan"], "0")
 
-		wr.Write([]string{" ", row["plugin"], row["state"], row["url"]})
+	// TODO build external function
+	//generateScanResult(vulns)
+	categories := db.GetCategories()
+	plugins := db.GetPlugins()
+	severities := db.GetSeveritiesById()
+
+	for _, catRow := range categories {
+		wr.Write([]string{" ", "Category:", catRow["name"]})
+		for _, pluginRow := range plugins {
+			if pluginRow["cat"] == catRow["id"] {
+				//wr.Write([]string{" ", "Plugin:", pluginRow["name"]})
+				for _, vulnRow := range vulns {
+					if vulnRow["plugin"] == pluginRow["id"] {
+						wr.Write([]string{" ", pluginRow["name"], severities[vulnRow["sev"]], vulnRow["state"], vulnRow["url"], vulnRow["comment"], vulnRow["desc"]})
+					}
+				}
+			}
+		}
 	}
+
 	wr.Flush()
 
 	w.Header().Set("Content-Type", "text/csv")
 	w.Header().Set("Content-Disposition", "attachment;filename=report.csv")
 	w.Write(b.Bytes())
 
+}
+
+func generateScanResult(vulns map[int]map[string]string) {
+	/*
+		categories := db.GetCategories()
+		plugins := db.GetPlugins()
+		severities := db.GetSeveritiesById()
+
+		records := [][]string{
+			{"first_name", "last_name", "username"},
+			{"Rob", "Pike", "rob"},
+			{"Ken", "Thompson", "ken"},
+			{"Robert", "Griesemer", "gri"},
+		}
+
+		for _, catRow := range categories {
+			wr.Write([]string{" ", "Category:", catRow["name"]})
+			for _, pluginRow := range plugins {
+				if pluginRow["cat"] == catRow["id"] {
+					//wr.Write([]string{" ", "Plugin:", pluginRow["name"]})
+					for _, vulnRow := range vulns {
+						if vulnRow["plugin"] == pluginRow["id"] {
+							wr.Write([]string{" ", pluginRow["name"], severities[vulnRow["sev"]], vulnRow["state"], vulnRow["url"], vulnRow["comment"], vulnRow["desc"]})
+						}
+					}
+				}
+			}
+		}
+	*/
 }
 
 // parseQueryString takes query string from a url and returns the key values as a map[string]string

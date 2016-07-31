@@ -78,6 +78,22 @@ func GetSeverities() map[string]string {
 	return m
 }
 
+// GetSeveritiesById returns all rows from the categories table with id as key
+func GetSeveritiesById() map[string]string {
+	rows, err := db.Query("SELECT severity_id, severity_name FROM severity")
+	checkErr(err)
+	m := make(map[string]string)
+	defer rows.Close()
+	for rows.Next() {
+		var (
+			id, name string
+		)
+		rows.Scan(&id, &name)
+		m[id] = name
+	}
+	return m
+}
+
 // PluginInsert insert a new Plugin into the db and returns the id from the new dataset
 func PluginInsert(pc, pn string) (id int64) {
 	stmt, err := db.Prepare("INSERT INTO plugins(plugins_categories, plugins_name) values(?,?)")
