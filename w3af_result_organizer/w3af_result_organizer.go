@@ -40,9 +40,6 @@ func vulns(w http.ResponseWriter, r *http.Request) {
 	data, err := json.Marshal(vulns)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(data)
-	//tpl := template.Must(template.ParseFiles("templates/index.html"))
-	//err := tpl.ExecuteTemplate(w, "index.html", vulns)
-	//err := tpl.ExecuteTemplate(w, "vuln.html", vulns)
 	checkErr(err)
 }
 
@@ -67,26 +64,35 @@ func exportScanResult(w http.ResponseWriter, r *http.Request) {
 	scan := db.GetScanData(m["scan"])
 
 	// insert some format stuff to make the cvs looking better
+	wr.Write([]string{"       "})
+	wr.Write([]string{" ", "Project:", scan["name"]})
+	wr.Write([]string{" ", "Scan:", scan["date"]})
 	wr.Write([]string{" "})
-	wr.Write([]string{" ", "Project:", scan["name"], "Scan:", scan["date"]})
+	wr.Write([]string{" ", "Findings in this scan", " ", " ", " ", " States: 0 new / 1 false-positiv / 2 solved"})
 	wr.Write([]string{" "})
+	wr.Write([]string{" "})
+	wr.Write([]string{" ", "CATEGORY", "PLUGIN", "SEVERITY", "STATE", "URL", "COMMENT", "DESCRIPTION"})
 
+	// first run get results by scan
 	vulns := db.GetVulnerabilities(m["scan"], "0")
+	// second run get results by project
+	//vulns := db.GetVulnerabilities("0", scan["id"])
 
 	// TODO build external function
+	//generateScanResult(vulns)
 	//generateScanResult(vulns)
 	categories := db.GetCategories()
 	plugins := db.GetPlugins()
 	severities := db.GetSeveritiesById()
 
 	for _, catRow := range categories {
-		wr.Write([]string{" ", "Category:", catRow["name"]})
+		wr.Write([]string{" ", catRow["name"]})
 		for _, pluginRow := range plugins {
 			if pluginRow["cat"] == catRow["id"] {
-				//wr.Write([]string{" ", "Plugin:", pluginRow["name"]})
+				wr.Write([]string{" ", " ", pluginRow["name"], " "})
 				for _, vulnRow := range vulns {
 					if vulnRow["plugin"] == pluginRow["id"] {
-						wr.Write([]string{" ", pluginRow["name"], severities[vulnRow["sev"]], vulnRow["state"], vulnRow["url"], vulnRow["comment"], vulnRow["desc"]})
+						wr.Write([]string{" ", " ", pluginRow["name"], severities[vulnRow["sev"]], vulnRow["state"], vulnRow["url"], vulnRow["comment"], vulnRow["desc"]})
 					}
 				}
 			}
@@ -99,35 +105,6 @@ func exportScanResult(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Disposition", "attachment;filename=report.csv")
 	w.Write(b.Bytes())
 
-}
-
-func generateScanResult(vulns map[int]map[string]string) {
-	/*
-		categories := db.GetCategories()
-		plugins := db.GetPlugins()
-		severities := db.GetSeveritiesById()
-
-		records := [][]string{
-			{"first_name", "last_name", "username"},
-			{"Rob", "Pike", "rob"},
-			{"Ken", "Thompson", "ken"},
-			{"Robert", "Griesemer", "gri"},
-		}
-
-		for _, catRow := range categories {
-			wr.Write([]string{" ", "Category:", catRow["name"]})
-			for _, pluginRow := range plugins {
-				if pluginRow["cat"] == catRow["id"] {
-					//wr.Write([]string{" ", "Plugin:", pluginRow["name"]})
-					for _, vulnRow := range vulns {
-						if vulnRow["plugin"] == pluginRow["id"] {
-							wr.Write([]string{" ", pluginRow["name"], severities[vulnRow["sev"]], vulnRow["state"], vulnRow["url"], vulnRow["comment"], vulnRow["desc"]})
-						}
-					}
-				}
-			}
-		}
-	*/
 }
 
 // parseQueryString takes query string from a url and returns the key values as a map[string]string

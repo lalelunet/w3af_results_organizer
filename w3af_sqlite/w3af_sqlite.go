@@ -242,14 +242,15 @@ func GetVulnerabilities() map[string]map[string]string {
 // GetScanData returns project and details from the scan
 func GetScanData(scan string) map[string]string {
 	var (
-		date, name string
+		date, name, id string
 	)
 
-	err := db.QueryRow("select scan_date, project_name from scans sc inner join projects pr on sc.scan_project =  pr.project_id where scan_id = ?", scan).Scan(&date, &name)
+	err := db.QueryRow("select scan_date, project_name, project_id from scans sc inner join projects pr on sc.scan_project =  pr.project_id where scan_id = ?", scan).Scan(&date, &name, &id)
 	checkErr(err)
 	m := make(map[string]string)
 	m["date"] = date
 	m["name"] = name
+	m["id"] = id
 
 	return m
 }
